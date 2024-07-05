@@ -1,0 +1,1 @@
+![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=drozdovdn&show_icons=true&theme=dark&locale=ru&border_color=000)

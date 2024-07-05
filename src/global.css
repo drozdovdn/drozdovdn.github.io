@@ -1,0 +1,110 @@
+:root {
+    --accent: 136, 58, 234;
+    --accent-light: 224, 204, 250;
+    --accent-dark: 49, 10, 101;
+    --accent-gradient: linear-gradient(
+            45deg,
+            rgb(var(--accent)),
+            rgb(var(--accent-light)) 30%,
+            white 60%
+    );
+    --color-white: #d9d9d9;
+    --color-grey: rgb(176, 176, 176);
+    --color-black: #2f2f2f;
+    --color-black-2: #1c1c1c;
+}
+html {
+    font-family: system-ui, sans-serif;
+    background: var(--color-black);
+    background-size: 224px;
+}
+body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+
+    color: var(--color-white);
+}
+
+body,
+ul,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    margin: 0;
+    padding: 0;
+}
+
+ul,
+li {
+    display: block;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+ul,
+li,
+div,
+section,
+form,
+input,
+button,
+span,
+p,
+img,
+a {
+    box-sizing: border-box;
+}
+
+a,
+a:hover,
+a:active,
+a:focus {
+    text-decoration: none;
+    outline: none;
+    /*color: var(--color-black-text);*/
+}
+
+input,
+input:hover,
+input:focus,
+textarea:hover,
+textarea:focus {
+    outline: none;
+    border: none;
+}
+
+code {
+    font-family:
+            Menlo,
+            Monaco,
+            Lucida Console,
+            Liberation Mono,
+            DejaVu Sans Mono,
+            Bitstream Vera Sans Mono,
+            Courier New,
+            monospace;
+}
+
+.icons {
+    margin: auto;
+    padding: 5rem 10rem;
+    width: 1200px;
+    p {
+        display: flex;
+        flex-wrap: wrap;
+        a {
+            height: 36px;
+            width: 36px;
+            margin-right: 10px;
+        }
+    }
+}
