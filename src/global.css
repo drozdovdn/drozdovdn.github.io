@@ -16,7 +16,7 @@
 html {
     font-family: system-ui, sans-serif;
     background: var(--color-black);
-    background-size: 224px;
+    /*background-size: 224px;*/
 }
 body {
     text-rendering: optimizeLegibility;
