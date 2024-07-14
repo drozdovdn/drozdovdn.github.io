@@ -16,7 +16,7 @@ const ScrambleText: React.FC<ScrambleTextProps> = ({ text }) => {
 			setHeadlineText((prevText) => {
 				const scrambledText = prevText
 					.split('')
-					.map((letter, index) => {
+					.map((_, index) => {
 						if (index < iteration) {
 							return text[index]
 						}
