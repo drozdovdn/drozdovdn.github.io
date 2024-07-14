@@ -1,1 +1,0 @@
-![](https://leetcard.jacoblin.cool/drozdovdn?ext=heatmap)
