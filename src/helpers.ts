@@ -1,4 +1,7 @@
-import type { LinkProps } from './components/types.ts'
+type LinkProps = {
+	href: string
+	title: string
+}
 
 export const linksNavBar: LinkProps[] = [
 	{
