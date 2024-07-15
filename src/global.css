@@ -108,3 +108,9 @@ code {
         }
     }
 }
+
+.statistic {
+    img {
+        width: 100%;
+    }
+}
