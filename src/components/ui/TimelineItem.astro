@@ -1,0 +1,77 @@
+---
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  company: string;
+  role: string;
+  period: string;
+  description: string[];
+  stack: string[];
+  current?: boolean;
+  index?: number;
+}
+
+const { company, role, period, description, stack, current = false, index = 0 } = Astro.props;
+---
+
+<div
+  class="scroll-reveal relative pl-8 pb-12 last:pb-0"
+  style={`transition-delay: ${index * 120}ms`}
+>
+  {/* Timeline line */}
+  <div class="absolute left-[11px] top-0 h-full w-px bg-[var(--color-border)]"></div>
+
+  {/* Timeline dot */}
+  <div
+    class:list={[
+      'absolute left-0 top-1.5 h-[22px] w-[22px] rounded-full border-2',
+      {
+        'border-[var(--color-accent)] bg-[var(--color-accent)]': current,
+        'border-[var(--color-border)] bg-[var(--color-bg-primary)]': !current,
+      },
+    ]}
+  >
+    {current && (
+      <span class="absolute inset-0 animate-ping rounded-full bg-[var(--color-accent)] opacity-20"></span>
+    )}
+  </div>
+
+  {/* Content */}
+  <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-5 transition-colors hover:border-[var(--color-border-hover)]">
+    <div class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h3 class="text-lg font-bold text-[var(--color-text-primary)]">{company}</h3>
+        <p class="text-sm text-[var(--color-accent)]">{role}</p>
+      </div>
+      <span
+        class:list={[
+          'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs',
+          {
+            'bg-[var(--color-accent)]/10 text-[var(--color-accent)]': current,
+            'bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)]': !current,
+          },
+        ]}
+      >
+        {current && <span class="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]"></span>}
+        {period}
+      </span>
+    </div>
+
+    <ul class="mb-4 space-y-1.5">
+      {description.map((item) => (
+        <li class="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]">
+          <span class="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--color-accent)]"></span>
+          {item}
+        </li>
+      ))}
+    </ul>
+
+    <div class="flex flex-wrap gap-2">
+      {stack.map((tech) => (
+        <span class="rounded border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-2 py-0.5 text-xs text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]">
+          {tech}
+        </span>
+      ))}
+    </div>
+  </div>
+</div>

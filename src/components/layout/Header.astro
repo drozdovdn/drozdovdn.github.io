@@ -1,0 +1,66 @@
+---
+import Navigation from './Navigation.astro';
+import ThemeToggle from './ThemeToggle.astro';
+---
+
+<header
+  class="fixed top-0 z-50 w-full border-b border-[var(--color-border)] bg-[var(--color-bg-primary)]/80 backdrop-blur-md"
+>
+  <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+    {/* Logo */}
+    <a
+      href="/"
+      class="group flex items-center gap-1 font-mono text-sm font-semibold text-[var(--color-text-primary)] transition-colors hover:text-[var(--color-accent)]"
+      aria-label="Home"
+    >
+      <span class="text-[var(--color-accent)]">~</span>
+      <span class="text-[var(--color-text-muted)]">/</span>
+      <span>drozdov</span>
+    </a>
+
+    {/* Desktop Nav */}
+    <div class="hidden items-center gap-4 md:flex">
+      <Navigation />
+      <div class="h-5 w-px bg-[var(--color-border)]"></div>
+      <ThemeToggle />
+    </div>
+
+    {/* Mobile Menu Button */}
+    <div class="flex items-center gap-2 md:hidden">
+      <ThemeToggle />
+      <button
+        id="mobile-menu-btn"
+        type="button"
+        class="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+      >
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  {/* Mobile Nav */}
+  <div
+    id="mobile-menu"
+    class="hidden border-t border-[var(--color-border)] bg-[var(--color-bg-primary)] px-4 py-4 md:hidden"
+  >
+    <Navigation />
+  </div>
+</header>
+
+<script is:inline>
+  (function () {
+    const btn = document.getElementById('mobile-menu-btn');
+    const menu = document.getElementById('mobile-menu');
+    if (!btn || !menu) return;
+
+    btn.addEventListener('click', () => {
+      const isOpen = !menu.classList.contains('hidden');
+      menu.classList.toggle('hidden');
+      btn.setAttribute('aria-expanded', String(!isOpen));
+    });
+  })();
+</script>

@@ -1,0 +1,48 @@
+---
+interface Props {
+  name: string;
+  level: number;
+  index?: number;
+}
+
+const { name, level, index = 0 } = Astro.props;
+---
+
+<div class="scroll-reveal group" style={`transition-delay: ${index * 80}ms`}>
+  <div class="mb-1.5 flex items-center justify-between">
+    <span class="text-sm text-[var(--color-text-primary)] transition-colors group-hover:text-[var(--color-accent)]">
+      {name}
+    </span>
+    <span class="text-xs text-[var(--color-text-muted)]">{level}%</span>
+  </div>
+  <div class="h-2 overflow-hidden rounded-full bg-[var(--color-bg-tertiary)]">
+    <div
+      class="skill-bar-fill h-full rounded-full bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-secondary)]"
+      style={`--progress-width: ${level}%`}
+      data-level={level}
+    ></div>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const bar = entry.target;
+            const level = bar.dataset.level || '0';
+            bar.style.width = level + '%';
+            bar.style.transition = 'width 1s ease-out';
+            observer.unobserve(bar);
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+    document.querySelectorAll('.skill-bar-fill').forEach((el) => {
+      el.style.width = '0%';
+      observer.observe(el);
+    });
+  })();
+</script>

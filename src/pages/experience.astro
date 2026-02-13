@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionTitle from '../components/ui/SectionTitle.astro';
+import TimelineItem from '../components/ui/TimelineItem.astro';
+import { experience } from '../data/experience';
+---
+
+<BaseLayout title="Опыт">
+  <SectionTitle
+    title="Опыт работы"
+    subtitle="Хронология моего профессионального пути в frontend-инженерии и архитектуре."
+    filename="experience.ts"
+  />
+
+  <div class="relative">
+    {experience.map((exp, i) => (
+      <TimelineItem
+        company={exp.company}
+        role={exp.role}
+        period={exp.period}
+        description={exp.description}
+        stack={exp.stack}
+        current={exp.current}
+        index={i}
+      />
+    ))}
+  </div>
+</BaseLayout>

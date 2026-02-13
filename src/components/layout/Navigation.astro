@@ -1,0 +1,34 @@
+---
+import { navItems } from '../../data/navigation';
+
+const currentPath = Astro.url.pathname;
+
+// Фильтруем только видимые пункты меню
+const visibleNavItems = navItems.filter(item => item.visible);
+
+const isActive = (path: string) => {
+  const normalizedCurrent = currentPath.endsWith('/') ? currentPath : currentPath + '/';
+  const normalizedPath = path.endsWith('/') ? path : path + '/';
+  if (path === '/') return normalizedCurrent === normalizedPath;
+  return normalizedCurrent.startsWith(normalizedPath);
+};
+---
+
+<nav class="flex items-center gap-1" aria-label="Main navigation">
+  {visibleNavItems.map((item) => (
+    <a
+      href={item.path}
+      class:list={[
+        'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+        {
+          'bg-[var(--color-accent)]/10 text-[var(--color-accent)]': isActive(item.path),
+          'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-text-primary)]':
+            !isActive(item.path),
+        },
+      ]}
+      aria-current={isActive(item.path) ? 'page' : undefined}
+    >
+      {item.label}
+    </a>
+  ))}
+</nav>

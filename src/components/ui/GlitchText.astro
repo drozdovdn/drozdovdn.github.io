@@ -1,0 +1,16 @@
+---
+interface Props {
+  text: string;
+  tag?: 'h1' | 'h2' | 'h3' | 'span';
+  class?: string;
+}
+
+const { text, tag: Tag = 'h2', class: className = '' } = Astro.props;
+---
+
+<Tag
+  class:list={['glitch-hover inline-block', className]}
+  data-text={text}
+>
+  {text}
+</Tag>

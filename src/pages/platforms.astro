@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionTitle from '../components/ui/SectionTitle.astro';
+import PlatformList from '../components/PlatformList';
+import { platforms } from '../data/platforms';
+---
+
+<BaseLayout title="Платформы">
+  <SectionTitle
+    title="Платформы"
+    subtitle="Моё присутствие на платформах для программирования и безопасности."
+    filename="platforms.ts"
+  />
+
+  <PlatformList platforms={platforms} client:load />
+</BaseLayout>

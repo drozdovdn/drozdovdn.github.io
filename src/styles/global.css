@@ -1,0 +1,252 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+@import "tailwindcss";
+
+/* ===== Theme CSS Variables ===== */
+@theme {
+  --color-bg-primary: #0a0a0a;
+  --color-bg-secondary: #141414;
+  --color-bg-tertiary: #1a1a1a;
+  --color-bg-card: #141414;
+  --color-border: #262626;
+  --color-border-hover: #404040;
+  --color-text-primary: #e5e5e5;
+  --color-text-secondary: #a3a3a3;
+  --color-text-muted: #737373;
+  --color-accent: #e8622c;
+  --color-accent-hover: #f57c4a;
+  --color-accent-secondary: #f59e0b;
+  --color-accent-secondary-hover: #fbbf24;
+
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+/* ===== Base Styles ===== */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-mono);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  color: var(--color-text-primary);
+}
+
+/* ===== Light Theme Overrides ===== */
+html.light {
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8f8f8;
+  --color-bg-tertiary: #f0f0f0;
+  --color-bg-card: #ffffff;
+  --color-border: #e0e0e0;
+  --color-border-hover: #c0c0c0;
+  --color-text-primary: #0f0f0f;
+  --color-text-secondary: #3f3f3f;
+  --color-text-muted: #6f6f6f;
+  --color-accent: #d94c10;
+  --color-accent-hover: #e8622c;
+  --color-accent-secondary: #d97706;
+  --color-accent-secondary-hover: #f59e0b;
+}
+
+/* Light theme: better readability for cards and borders */
+html.light .rounded-lg.border {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+html.light .rounded-lg.border:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-hover);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* ===== Animations ===== */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes typing-cursor {
+  0%, 100% { border-color: var(--color-accent); }
+  50% { border-color: transparent; }
+}
+
+@keyframes glitch-1 {
+  0% { clip-path: inset(20% 0 60% 0); transform: translate(-3px, 2px); }
+  20% { clip-path: inset(50% 0 10% 0); transform: translate(3px, -1px); }
+  40% { clip-path: inset(10% 0 70% 0); transform: translate(-2px, 1px); }
+  60% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
+  80% { clip-path: inset(30% 0 40% 0); transform: translate(-1px, 2px); }
+  100% { clip-path: inset(60% 0 20% 0); transform: translate(1px, -1px); }
+}
+
+@keyframes glitch-2 {
+  0% { clip-path: inset(60% 0 20% 0); transform: translate(3px, -1px); }
+  20% { clip-path: inset(10% 0 70% 0); transform: translate(-2px, 2px); }
+  40% { clip-path: inset(80% 0 5% 0); transform: translate(1px, -2px); }
+  60% { clip-path: inset(20% 0 60% 0); transform: translate(-3px, 1px); }
+  80% { clip-path: inset(50% 0 10% 0); transform: translate(2px, -1px); }
+  100% { clip-path: inset(30% 0 40% 0); transform: translate(-1px, 2px); }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes progress-fill {
+  from { width: 0%; }
+  to { width: var(--progress-width, 0%); }
+}
+
+/* ===== Utility Classes ===== */
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.6s ease-out forwards;
+}
+
+.animate-progress-fill {
+  animation: progress-fill 1s ease-out forwards;
+}
+
+/* Glitch hover effect */
+.glitch-hover {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch-hover::before,
+.glitch-hover::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.glitch-hover::before {
+  color: var(--color-accent);
+  text-shadow: 2px 0 var(--color-accent);
+}
+
+.glitch-hover::after {
+  color: var(--color-accent-secondary);
+  text-shadow: -2px 0 var(--color-accent-secondary);
+}
+
+.glitch-hover:hover::before {
+  opacity: 0.7;
+  animation: glitch-1 0.4s steps(2, end) infinite;
+}
+
+.glitch-hover:hover::after {
+  opacity: 0.7;
+  animation: glitch-2 0.4s steps(2, end) infinite;
+}
+
+/* Scanline overlay */
+.scanline-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--color-accent) 5%, transparent));
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Scroll reveal (initially hidden, JS adds .revealed) */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Code-style decorative comment */
+.code-comment::before {
+  content: '// ';
+  color: var(--color-text-muted);
+}
+
+/* ===== Blog Tags Styling ===== */
+/* Простой cursor pointer и легкая анимация */
+.tag-clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tag-clickable:hover {
+  transform: translateY(-2px);
+}
+
+.tag-clickable:active {
+  transform: translateY(0);
+}
+
+/* Эффект при клике */
+.tag-clickable:active {
+  transform: scale(0.95);
+}

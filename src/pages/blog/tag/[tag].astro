@@ -1,0 +1,137 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SectionTitle from '../../../components/ui/SectionTitle.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('blog');
+  
+  // Собираем все уникальные теги
+  const allTags = [...new Set(allPosts.flatMap(post => post.data.tags))];
+  
+  // Создаем страницы для каждого тега
+  return allTags.map(tag => {
+    const filteredPosts = allPosts
+      .filter(post => post.data.tags.includes(tag))
+      .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+    
+    return {
+      params: { tag },
+      props: { tag, posts: filteredPosts, allTags },
+    };
+  });
+}
+
+const { tag, posts, allTags } = Astro.props;
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat('ru-RU', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(date);
+}
+
+function calculateReadTime(content: string) {
+  const wordsPerMinute = 200;
+  const words = content.trim().split(/\s+/).length;
+  return Math.ceil(words / wordsPerMinute);
+}
+---
+
+<BaseLayout title={`Статьи по тегу: ${tag}`}>
+  <div class="mb-8">
+    <a
+      href="/blog/"
+      class="inline-flex items-center gap-2 text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-accent)]"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Все статьи
+    </a>
+  </div>
+
+  <SectionTitle
+    title={`Тег: ${tag}`}
+    subtitle={`Найдено статей: ${posts.length}`}
+    filename="blog.ts"
+  />
+
+  {/* Все доступные теги */}
+  <div class="mb-12 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6">
+    <h3 class="mb-4 text-sm font-semibold text-[var(--color-text-muted)]">🏷️ Все теги:</h3>
+    <div class="flex flex-wrap gap-2">
+      {allTags.map(t => (
+        <a
+          href={`/blog/tag/${t}/`}
+          class:list={[
+            'tag-clickable rounded-full px-3 py-1.5 text-xs font-medium transition-all',
+            t === tag
+              ? 'bg-[var(--color-accent)] text-white'
+              : 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20'
+          ]}
+        >
+          {t}
+        </a>
+      ))}
+    </div>
+  </div>
+
+  {/* Список статей */}
+  <div class="grid gap-8">
+    {posts.map((post, i) => (
+      <article
+        class="scroll-reveal group rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 transition-all hover:border-[var(--color-accent)] hover:-translate-y-1"
+        style={`transition-delay: ${i * 100}ms`}
+      >
+        {/* Tags */}
+        <div class="mb-3 flex flex-wrap gap-2">
+          {post.data.tags.map(postTag => (
+            <a
+              href={`/blog/tag/${postTag}/`}
+              class:list={[
+                'tag-clickable rounded-full px-2.5 py-0.5 text-xs font-medium transition-all',
+                postTag === tag
+                  ? 'bg-[var(--color-accent)] text-white'
+                  : 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20'
+              ]}
+            >
+              {postTag}
+            </a>
+          ))}
+        </div>
+
+        {/* Title */}
+        <h2 class="mb-2 text-2xl font-bold text-[var(--color-text-primary)] transition-colors group-hover:text-[var(--color-accent)]">
+          <a href={`/blog/${post.slug}/`}>
+            {post.data.title}
+          </a>
+        </h2>
+
+        {/* Meta */}
+        <div class="mb-3 flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
+          <span>{formatDate(post.data.publishedAt)}</span>
+          <span>•</span>
+          <span>{calculateReadTime(post.body)} мин чтения</span>
+        </div>
+
+        {/* Description */}
+        <p class="mb-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
+          {post.data.description}
+        </p>
+
+        {/* Read more */}
+        <a
+          href={`/blog/${post.slug}/`}
+          class="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-accent)] transition-colors hover:underline"
+        >
+          Читать далее
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+      </article>
+    ))}
+  </div>
+</BaseLayout>

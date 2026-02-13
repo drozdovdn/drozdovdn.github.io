@@ -1,0 +1,78 @@
+---
+interface Props {
+  name: string;
+  url: string;
+  username: string;
+  rank: string;
+  stats: string[];
+  color: string;
+  index?: number;
+  // Dynamic data from API (overrides rank/stats if provided)
+  dynamicRank?: string;
+  dynamicStats?: string[];
+}
+
+const { 
+  name, 
+  url, 
+  username, 
+  rank, 
+  stats, 
+  color, 
+  index = 0,
+  dynamicRank,
+  dynamicStats,
+} = Astro.props;
+
+// Use dynamic data if available, otherwise fallback to static
+const displayRank = dynamicRank || rank;
+const displayStats = dynamicStats || stats;
+---
+
+<a
+  href={url}
+  target="_blank"
+  rel="noopener noreferrer"
+  class="scroll-reveal group block rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-5 transition-all duration-300 hover:border-[var(--color-border-hover)] hover:-translate-y-1 hover:shadow-lg"
+  style={`transition-delay: ${index * 100}ms`}
+  aria-label={`${name} profile — ${username}`}
+>
+  {/* Header */}
+  <div class="mb-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div
+        class="flex h-10 w-10 items-center justify-center rounded-lg text-lg font-bold"
+        style={`background-color: ${color}20; color: ${color}`}
+      >
+        {name.charAt(0)}
+      </div>
+      <div>
+        <h3 class="font-bold text-[var(--color-text-primary)] transition-colors group-hover:text-[var(--color-accent)]">
+          {name}
+        </h3>
+        <p class="text-xs text-[var(--color-text-muted)]">@{username}</p>
+      </div>
+    </div>
+    <svg class="h-4 w-4 text-[var(--color-text-muted)] transition-transform group-hover:translate-x-1 group-hover:text-[var(--color-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+    </svg>
+  </div>
+
+  {/* Rank badge */}
+  <div
+    class="mb-4 inline-block rounded-full px-3 py-1 text-xs font-semibold"
+    style={`background-color: ${color}15; color: ${color}; border: 1px solid ${color}30`}
+  >
+    {displayRank}
+  </div>
+
+  {/* Stats */}
+  <ul class="space-y-1.5">
+    {displayStats.map((stat) => (
+      <li class="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]">
+        <span class="mt-1.5 h-1 w-1 shrink-0 rounded-full" style={`background-color: ${color}`}></span>
+        {stat}
+      </li>
+    ))}
+  </ul>
+</a>

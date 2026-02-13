@@ -1,0 +1,220 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat('ru-RU', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(date);
+}
+
+function calculateReadTime(content: string) {
+  const wordsPerMinute = 200;
+  const words = content.trim().split(/\s+/).length;
+  return Math.ceil(words / wordsPerMinute);
+}
+---
+
+<BaseLayout title={post.data.title}>
+  <article class="mx-auto max-w-3xl">
+    {/* Back button */}
+    <a
+      href="/blog/"
+      class="mb-8 inline-flex items-center gap-2 text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-accent)]"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Все статьи
+    </a>
+
+    {/* Tags */}
+    <div class="mb-4 flex flex-wrap gap-2">
+      {post.data.tags.map(tag => (
+        <a
+          href={`/blog/tag/${tag}/`}
+          class="tag-clickable rounded-full bg-[var(--color-accent)]/10 px-2.5 py-0.5 text-xs font-medium text-[var(--color-accent)] transition-all hover:bg-[var(--color-accent)]/20"
+        >
+          {tag}
+        </a>
+      ))}
+    </div>
+
+    {/* Title */}
+    <h1 class="mb-4 text-4xl font-bold text-[var(--color-text-primary)] sm:text-5xl">
+      {post.data.title}
+    </h1>
+
+    {/* Meta */}
+    <div class="mb-8 flex items-center gap-3 text-sm text-[var(--color-text-muted)]">
+      <span>{formatDate(post.data.publishedAt)}</span>
+      <span>•</span>
+      <span>{calculateReadTime(post.body)} мин чтения</span>
+    </div>
+
+    {/* Content */}
+    <div class="prose prose-invert max-w-none">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style is:global>
+  /* Prose styles for blog content */
+  .prose {
+    color: var(--color-text-secondary);
+    line-height: 1.75;
+  }
+
+  .prose h2 {
+    color: var(--color-text-primary);
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .prose h3 {
+    color: var(--color-text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .prose p {
+    margin-bottom: 1.25rem;
+  }
+
+  .prose ul, .prose ol {
+    margin-bottom: 1.25rem;
+    padding-left: 1.5rem;
+  }
+
+  .prose li {
+    margin-bottom: 0.5rem;
+  }
+
+  .prose strong {
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+
+  .prose code {
+    color: var(--color-accent);
+    background: var(--color-bg-secondary);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+    font-family: 'Fira Code', 'Courier New', monospace;
+  }
+
+  .prose pre {
+    background: var(--color-bg-secondary) !important;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+
+  .prose pre code {
+    background: transparent;
+    padding: 0;
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  /* Light theme specific styles for better code readability */
+  html.light .prose {
+    color: var(--color-text-secondary);
+  }
+
+  html.light .prose code {
+    background: #f6f8fa;
+    color: #c7254e;
+    border: 1px solid #e1e4e8;
+    font-weight: 500;
+  }
+
+  html.light .prose pre {
+    background: #f6f8fa !important;
+    border: 1px solid #e1e4e8;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  html.light .prose pre code {
+    color: #24292e;
+    border: none;
+    font-weight: 400;
+  }
+
+  html.light .prose blockquote {
+    color: var(--color-text-secondary);
+    background: #f6f8fa;
+    padding: 1rem 1rem 1rem 1.5rem;
+    border-radius: 0.25rem;
+    border-left-color: var(--color-accent);
+  }
+
+  html.light .prose strong {
+    color: #0f0f0f;
+    font-weight: 600;
+  }
+
+  html.light .prose h2,
+  html.light .prose h3 {
+    color: #0f0f0f;
+  }
+
+  /* Dark theme code styles for consistency */
+  html:not(.light) .prose pre {
+    background: var(--color-bg-secondary) !important;
+    border: 1px solid var(--color-border);
+  }
+
+  html:not(.light) .prose code {
+    color: var(--color-accent);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+  }
+
+  html:not(.light) .prose pre code {
+    background: transparent;
+    border: none;
+    color: var(--color-text-primary);
+  }
+
+  .prose a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    transition: opacity 0.2s;
+  }
+
+  .prose a:hover {
+    opacity: 0.8;
+  }
+
+  .prose blockquote {
+    border-left: 3px solid var(--color-accent);
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    color: var(--color-text-muted);
+  }
+</style>

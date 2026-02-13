@@ -1,0 +1,37 @@
+---
+import { socialLinks } from '../../data/personal';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
+  <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+      {/* Left: copyright */}
+      <div class="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+        <span class="text-[var(--color-accent)]">~</span>
+        <span>/</span>
+        <span>drozdov</span>
+        <span class="mx-2 text-[var(--color-border)]">|</span>
+        <span>
+          &copy; {year} — Все права защищены.
+        </span>
+      </div>
+
+      {/* Right: social links */}
+      <div class="flex items-center gap-3">
+        {socialLinks.map((link) => (
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-xs text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-accent)]"
+            aria-label={link.name}
+          >
+            {link.name}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</footer>
