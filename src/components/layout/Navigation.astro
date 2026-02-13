@@ -14,12 +14,12 @@ const isActive = (path: string) => {
 };
 ---
 
-<nav class="flex items-center gap-1" aria-label="Main navigation">
+<nav class="flex flex-col gap-2 md:flex-row md:items-center md:gap-1" aria-label="Main navigation">
   {visibleNavItems.map((item) => (
     <a
       href={item.path}
       class:list={[
-        'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+        'rounded-md px-3 py-2 text-sm font-medium transition-colors md:py-1.5 md:text-xs',
         {
           'bg-[var(--color-accent)]/10 text-[var(--color-accent)]': isActive(item.path),
           'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-text-primary)]':

@@ -44,12 +44,12 @@ function calculateReadTime(content: string) {
   />
 
   {/* Фильтр по тегам */}
-  <div class="mb-12 scroll-reveal rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6">
-    <div class="mb-4 flex items-center justify-between">
+  <div class="mb-8 scroll-reveal rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 sm:mb-12 sm:p-6">
+    <div class="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:items-center sm:justify-between">
       <h3 class="text-sm font-semibold text-[var(--color-text-muted)]">🏷️ Фильтр по тегам:</h3>
       <button
         id="clear-filter"
-        class="hidden text-xs text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-hover)]"
+        class="hidden self-start text-xs text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-hover)] sm:self-auto"
       >
         Сбросить фильтр
       </button>
@@ -57,14 +57,14 @@ function calculateReadTime(content: string) {
     <div class="flex flex-wrap gap-2">
       <button
         data-filter="all"
-        class="filter-tag tag-clickable rounded-full bg-[var(--color-accent)] px-3 py-1.5 text-xs font-medium text-white transition-all hover:opacity-80"
+        class="filter-tag tag-clickable rounded-full bg-[var(--color-accent)] px-2.5 py-1 text-xs font-medium text-white transition-all hover:opacity-80 sm:px-3 sm:py-1.5"
       >
         Все ({posts.length})
       </button>
       {allTags.map(tag => (
         <button
           data-filter={tag}
-          class="filter-tag tag-clickable rounded-full bg-[var(--color-accent)]/10 px-3 py-1.5 text-xs font-medium text-[var(--color-accent)] transition-all hover:bg-[var(--color-accent)]/20"
+          class="filter-tag tag-clickable rounded-full bg-[var(--color-accent)]/10 px-2.5 py-1 text-xs font-medium text-[var(--color-accent)] transition-all hover:bg-[var(--color-accent)]/20 sm:px-3 sm:py-1.5"
         >
           {tag} ({tagCounts[tag]})
         </button>
@@ -72,10 +72,10 @@ function calculateReadTime(content: string) {
     </div>
   </div>
 
-  <div id="posts-container" class="grid gap-8">
+  <div id="posts-container" class="grid gap-6 sm:gap-8">
     {posts.map((post, i) => (
       <article
-        class="post-item scroll-reveal group rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 transition-all hover:border-[var(--color-accent)] hover:-translate-y-1"
+        class="post-item scroll-reveal group rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 transition-all hover:border-[var(--color-accent)] hover:-translate-y-1 sm:p-6"
         style={`transition-delay: ${i * 100}ms`}
         data-tags={post.data.tags.join(',')}
       >
@@ -84,7 +84,7 @@ function calculateReadTime(content: string) {
           {post.data.tags.map(tag => (
             <a
               href={`/blog/tag/${tag}/`}
-              class="tag-clickable rounded-full bg-[var(--color-accent)]/10 px-2.5 py-0.5 text-xs font-medium text-[var(--color-accent)] transition-all hover:bg-[var(--color-accent)]/20"
+              class="tag-clickable rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-xs font-medium text-[var(--color-accent)] transition-all hover:bg-[var(--color-accent)]/20 sm:px-2.5"
             >
               {tag}
             </a>
@@ -92,7 +92,7 @@ function calculateReadTime(content: string) {
         </div>
 
         {/* Title */}
-        <h2 class="mb-2 text-2xl font-bold text-[var(--color-text-primary)] transition-colors group-hover:text-[var(--color-accent)]">
+        <h2 class="mb-2 text-xl font-bold text-[var(--color-text-primary)] transition-colors group-hover:text-[var(--color-accent)] sm:text-2xl">
           <a href={`/blog/${post.slug}/`}>
             {post.data.title}
           </a>

@@ -69,8 +69,8 @@ function formatDate(date: Date) {
       </h2>
 
       {/* Subtitle */}
-      <p class="mb-8 max-w-xl text-base text-[var(--color-text-secondary)]">
-        Делаю фронтенд, который переживает рост продукта: архитектура, поддерживаемость, контроль сложности и стабильные изменения. <br/>
+      <p class="mb-6 max-w-xl text-sm leading-relaxed text-[var(--color-text-secondary)] sm:mb-8 sm:text-base">
+        Делаю фронтенд, который переживает рост продукта: архитектура, поддерживаемость, контроль сложности и стабильные изменения. <br class="hidden sm:inline"/>
         Системно работаю с производительностью и развиваюсь в направлении веб-безопасности.
       </p>
 
@@ -127,18 +127,18 @@ function formatDate(date: Date) {
       </div>
 
       {/* Info cards */}
-      <div class="space-y-4">
+      <div class="space-y-3 sm:space-y-4">
         {[
           { label: 'Локация', value: 'Россия', icon: '📍' },
           { label: 'Языки', value: 'Русский', icon: '🌐' },
           { label: 'Текущий фокус', value: 'Frontend-архитектура и веб-безопасность', icon: '🎯' },
         ].map((info, i) => (
           <div
-            class="scroll-reveal rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 transition-colors hover:border-[var(--color-border-hover)]"
+            class="scroll-reveal rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-3 transition-colors hover:border-[var(--color-border-hover)] sm:p-4"
             style={`transition-delay: ${i * 100}ms`}
           >
             <div class="mb-1 text-xs text-[var(--color-text-muted)]">{info.label}</div>
-            <div class="text-sm font-semibold text-[var(--color-text-primary)]">{info.value}</div>
+            <div class="text-xs font-semibold text-[var(--color-text-primary)] sm:text-sm">{info.value}</div>
           </div>
         ))}
       </div>

@@ -8,19 +8,19 @@ interface Props {
 const { title, subtitle, filename } = Astro.props;
 ---
 
-<div class="mb-12">
+<div class="mb-8 sm:mb-12">
   {filename && (
     <span class="mb-2 block text-xs text-[var(--color-text-muted)]">
       {'// '}{filename}
     </span>
   )}
-  <h1 class="text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">
+  <h1 class="text-2xl font-bold text-[var(--color-text-primary)] sm:text-3xl lg:text-4xl">
     <span class="text-[var(--color-accent)]">{'{ '}</span><span
       class="glitch-hover"
       data-text={title}>{title}</span><span class="text-[var(--color-accent)]">{' }'}</span>
   </h1>
   {subtitle && (
-    <p class="mt-3 text-base text-[var(--color-text-secondary)]">{subtitle}</p>
+    <p class="mt-2 text-sm text-[var(--color-text-secondary)] sm:mt-3 sm:text-base">{subtitle}</p>
   )}
-  <div class="mt-4 h-px w-24 bg-gradient-to-r from-[var(--color-accent)] to-transparent"></div>
+  <div class="mt-3 h-px w-20 bg-gradient-to-r from-[var(--color-accent)] to-transparent sm:mt-4 sm:w-24"></div>
 </div>

@@ -90,15 +90,15 @@ export default function PlatformList({ platforms }: Props) {
         href={platform.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="scroll-reveal group block rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-5 transition-all duration-300 hover:border-[var(--color-border-hover)] hover:-translate-y-1 hover:shadow-lg"
+        className="scroll-reveal group block rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 transition-all duration-300 hover:border-[var(--color-border-hover)] hover:-translate-y-1 hover:shadow-lg sm:p-5"
         style={{ transitionDelay: `${i * 100}ms` }}
         aria-label={`${platform.name} profile — ${platform.username}`}
       >
         {/* Header */}
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="mb-3 flex items-center justify-between sm:mb-4">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-lg font-bold"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-base font-bold sm:h-10 sm:w-10 sm:text-lg"
               style={{
                 backgroundColor: `${platform.color}20`,
                 color: platform.color,
@@ -106,15 +106,15 @@ export default function PlatformList({ platforms }: Props) {
             >
               {platform.name.charAt(0)}
             </div>
-            <div>
-              <h3 className="font-bold text-[var(--color-text-primary)] transition-colors group-hover:text-[var(--color-accent)]">
+            <div className="min-w-0">
+              <h3 className="truncate text-sm font-bold text-[var(--color-text-primary)] transition-colors group-hover:text-[var(--color-accent)] sm:text-base">
                 {platform.name}
               </h3>
-              <p className="text-xs text-[var(--color-text-muted)]">@{platform.username}</p>
+              <p className="truncate text-xs text-[var(--color-text-muted)]">@{platform.username}</p>
             </div>
           </div>
           <svg
-            className="h-4 w-4 text-[var(--color-text-muted)] transition-transform group-hover:translate-x-1 group-hover:text-[var(--color-accent)]"
+            className="h-4 w-4 shrink-0 text-[var(--color-text-muted)] transition-transform group-hover:translate-x-1 group-hover:text-[var(--color-accent)]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -130,7 +130,7 @@ export default function PlatformList({ platforms }: Props) {
 
         {/* Rank badge */}
         <div
-          className="mb-4 inline-block rounded-full px-3 py-1 text-xs font-semibold"
+          className="mb-3 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold sm:mb-4 sm:px-3 sm:py-1"
           style={{
             backgroundColor: `${platform.color}15`,
             color: platform.color,
@@ -151,9 +151,9 @@ export default function PlatformList({ platforms }: Props) {
           {platform.isLoading ? (
             <>
               {[...Array(3)].map((_, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]">
+                <li key={idx} className="flex items-start gap-2 text-xs text-[var(--color-text-secondary)] sm:text-sm">
                   <span
-                    className="mt-1.5 h-1 w-1 shrink-0 rounded-full"
+                    className="mt-1 h-1 w-1 shrink-0 rounded-full sm:mt-1.5"
                     style={{ backgroundColor: platform.color }}
                   ></span>
                   <span className="animate-pulse text-[var(--color-text-muted)]">Загрузка статистики...</span>
@@ -162,9 +162,9 @@ export default function PlatformList({ platforms }: Props) {
             </>
           ) : (
             displayStats.map((stat, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]">
+              <li key={idx} className="flex items-start gap-2 text-xs text-[var(--color-text-secondary)] sm:text-sm">
                 <span
-                  className="mt-1.5 h-1 w-1 shrink-0 rounded-full"
+                  className="mt-1 h-1 w-1 shrink-0 rounded-full sm:mt-1.5"
                   style={{ backgroundColor: platform.color }}
                 ></span>
                 {stat}
