@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
+import { ViewTransitions } from 'astro:transitions';
 
 interface Props {
   title: string;
@@ -9,6 +10,8 @@ interface Props {
 }
 
 const { title, description = 'Senior Frontend Developer — Portfolio & Resume' } = Astro.props;
+const pageTitle = `${title} | Alex Cipher`;
+const canonicalUrl = Astro.url.href;
 ---
 
 <!doctype html>
@@ -18,8 +21,23 @@ const { title, description = 'Senior Frontend Developer — Portfolio & Resume' 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    {/* Open Graph */}
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="ru_RU" />
+
+    {/* Twitter / X */}
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title} | Alex Cipher</title>
+    <title>{pageTitle}</title>
+    <ViewTransitions />
   </head>
   <body
     class="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-colors duration-300"
@@ -29,6 +47,18 @@ const { title, description = 'Senior Frontend Developer — Portfolio & Resume' 
       <slot />
     </main>
     <Footer />
+
+    {/* Scroll-to-top button */}
+    <button
+      id="scroll-to-top"
+      transition:persist
+      aria-label="Наверх"
+      class="fixed bottom-6 right-6 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] opacity-0 pointer-events-none transition-all duration-300 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] hover:-translate-y-1"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+      </svg>
+    </button>
 
     {/* Theme initialization — runs before paint to prevent flash */}
     <script is:inline>
@@ -45,7 +75,7 @@ const { title, description = 'Senior Frontend Developer — Portfolio & Resume' 
       })();
     </script>
 
-    {/* Theme toggle logic — one handler for all toggle buttons */}
+    {/* Theme toggle — event delegation persists across view transitions */}
     <script is:inline>
       (function () {
         var updateAllIcons = function () {
@@ -59,9 +89,12 @@ const { title, description = 'Senior Frontend Developer — Portfolio & Resume' 
         };
 
         updateAllIcons();
+        document.addEventListener('astro:page-load', updateAllIcons);
 
-        document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
-          btn.addEventListener('click', function () {
+        if (!window._themeToggleInit) {
+          window._themeToggleInit = true;
+          document.addEventListener('click', function (e) {
+            if (!e.target.closest('[data-theme-toggle]')) return;
             var isLight = document.documentElement.classList.contains('light');
             if (isLight) {
               document.documentElement.classList.remove('light');
@@ -74,16 +107,19 @@ const { title, description = 'Senior Frontend Developer — Portfolio & Resume' 
             }
             updateAllIcons();
           });
-        });
+        }
       })();
     </script>
 
     {/* Scroll reveal observer */}
     <script is:inline>
       (function () {
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
+        if (window._scrollRevealInit) return;
+        window._scrollRevealInit = true;
+
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
               if (entry.isIntersecting) {
                 entry.target.classList.add('revealed');
                 observer.unobserve(entry.target);
@@ -92,11 +128,39 @@ const { title, description = 'Senior Frontend Developer — Portfolio & Resume' 
           },
           { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
         );
-        document.querySelectorAll('.scroll-reveal').forEach((el) => observer.observe(el));
 
-        // Re-observe after view transitions
-        document.addEventListener('astro:page-load', () => {
-          document.querySelectorAll('.scroll-reveal:not(.revealed)').forEach((el) => observer.observe(el));
+        function observeAll() {
+          document.querySelectorAll('.scroll-reveal:not(.revealed)').forEach(function (el) {
+            observer.observe(el);
+          });
+        }
+
+        observeAll();
+        document.addEventListener('astro:page-load', observeAll);
+      })();
+    </script>
+
+    {/* Scroll to top */}
+    <script is:inline>
+      (function () {
+        if (window._scrollTopInit) return;
+        window._scrollTopInit = true;
+
+        var btn = document.getElementById('scroll-to-top');
+        if (!btn) return;
+
+        window.addEventListener('scroll', function () {
+          if (window.scrollY > 300) {
+            btn.classList.add('opacity-100');
+            btn.classList.remove('opacity-0', 'pointer-events-none');
+          } else {
+            btn.classList.remove('opacity-100');
+            btn.classList.add('opacity-0', 'pointer-events-none');
+          }
+        }, { passive: true });
+
+        btn.addEventListener('click', function () {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         });
       })();
     </script>

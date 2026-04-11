@@ -2,6 +2,7 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import SectionTitle from '../../../components/ui/SectionTitle.astro';
 import { getCollection } from 'astro:content';
+import { formatDate, calculateReadTime } from '../../../utils/blog';
 
 export async function getStaticPaths() {
   const allPosts = await getCollection('blog');
@@ -23,20 +24,6 @@ export async function getStaticPaths() {
 }
 
 const { tag, posts, allTags } = Astro.props;
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat('ru-RU', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(date);
-}
-
-function calculateReadTime(content: string) {
-  const wordsPerMinute = 200;
-  const words = content.trim().split(/\s+/).length;
-  return Math.ceil(words / wordsPerMinute);
-}
 ---
 
 <BaseLayout title={`Статьи по тегу: ${tag}`}>
@@ -60,7 +47,7 @@ function calculateReadTime(content: string) {
 
   {/* Все доступные теги */}
   <div class="mb-12 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6">
-    <h3 class="mb-4 text-sm font-semibold text-[var(--color-text-muted)]">🏷️ Все теги:</h3>
+    <h3 class="mb-4 text-sm font-semibold text-[var(--color-text-muted)]">// теги</h3>
     <div class="flex flex-wrap gap-2">
       {allTags.map(t => (
         <a

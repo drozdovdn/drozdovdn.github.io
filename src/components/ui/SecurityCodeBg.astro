@@ -1,0 +1,84 @@
+---
+// Floating security code fragments — decorative background, desktop only
+---
+
+<div id="sec-bg" aria-hidden="true" class="pointer-events-none fixed inset-0 z-0 overflow-hidden select-none"></div>
+
+<style>
+  @keyframes secFloat {
+    0%   { transform: translateY(0);     opacity: 0; }
+    6%   { opacity: 1; }
+    88%  { opacity: 1; }
+    100% { transform: translateY(-110vh); opacity: 0; }
+  }
+
+  .sec-line {
+    position: absolute;
+    bottom: 0;
+    font-family: var(--font-mono, "JetBrains Mono", monospace);
+    white-space: nowrap;
+    color: var(--color-accent);
+    animation: secFloat linear infinite;
+    will-change: transform, opacity;
+  }
+</style>
+
+<script is:inline>
+(function () {
+  var container = document.getElementById('sec-bg');
+  if (!container) return;
+  if (window.innerWidth <= 900) return; // desktop only
+
+  var snippets = [
+    'nmap -sV --open 10.0.0.1/24',
+    "sqlmap -u '/?id=1' --level=5",
+    "' OR 1=1--",
+    '<script>alert(document.cookie)</scr' + 'ipt>',
+    'X-Forwarded-For: 127.0.0.1',
+    'HTTP/1.1 403 Forbidden',
+    '../../../etc/passwd',
+    'SELECT * FROM users WHERE 1=1--',
+    'nc -lvnp 4444',
+    'python3 exploit.py --target',
+    'gobuster dir -u http://target -w big.txt',
+    'hashcat -m 0 hashes.txt rockyou.txt',
+    'SSRF → 169.254.169.254/latest/meta-data',
+    'Authorization: Bearer eyJhbGci0iJIUzI1NiJ9',
+    '{"status":500,"error":"SQL syntax"}',
+    'burpsuite --config-file=project.burp',
+    'hydra -l admin -P passwords.txt ssh://',
+    'Content-Security-Policy: default-src self',
+    "msfvenom -p linux/x64/shell_reverse_tcp LPORT=4444",
+    "curl -X POST /api/login -d \"user=admin'--\"",
+    'CVE-2021-44228 (Log4Shell)',
+    'IDOR: /api/user/1337/profile',
+    'Blind SSRF via webhook',
+    'XSS in CSP nonce bypass',
+    'JWT alg:none signature bypass',
+  ];
+
+  // Spread across full width, avoid clustering
+  var total = snippets.length;
+  snippets.forEach(function (text, i) {
+    var el = document.createElement('span');
+    el.className = 'sec-line';
+    el.textContent = text;
+
+    // Spread x positions evenly with small jitter
+    var x = (i / total) * 94 + 1 + (Math.random() * 3 - 1.5);
+    var duration = 38 + Math.random() * 28; // 38–66s
+    var delay = -(Math.random() * duration);  // start already in flight
+    var fontSize = 10 + Math.floor(Math.random() * 2.5); // 10–12px
+    // vary opacity per snippet for depth
+    var opacity = (0.06 + Math.random() * 0.09).toFixed(3); // 0.06–0.15
+
+    el.style.left = x + '%';
+    el.style.fontSize = fontSize + 'px';
+    el.style.opacity = opacity;
+    el.style.animationDuration = duration + 's';
+    el.style.animationDelay = delay + 's';
+
+    container.appendChild(el);
+  });
+})();
+</script>

@@ -11,7 +11,7 @@ const { title, subtitle, filename } = Astro.props;
 <div class="mb-8 sm:mb-12">
   {filename && (
     <span class="mb-2 block text-xs text-[var(--color-text-muted)]">
-      {'// '}{filename}
+      <span class="text-[var(--color-accent)]">$</span>{' '}{filename}
     </span>
   )}
   <h1 class="text-2xl font-bold text-[var(--color-text-primary)] sm:text-3xl lg:text-4xl">

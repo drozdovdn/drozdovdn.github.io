@@ -28,7 +28,7 @@ export const navItems: NavItem[] = [
   {
     label: 'Блог',
     path: '/blog/',
-    visible: false,
+    visible: true,
   },
   {
     label: 'Контакты',

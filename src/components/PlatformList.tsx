@@ -10,11 +10,10 @@ interface PlatformWithData extends Platform {
   dynamicRank?: string;
   dynamicStats?: string[];
   isLoading: boolean;
+  hasError?: boolean;
 }
 
 export default function PlatformList({ platforms }: Props) {
-  console.log('PlatformList received:', platforms);
-  console.log('Platforms length:', platforms?.length);
   
   // Фильтруем только видимые платформы
   const visiblePlatforms = platforms.filter(p => p.visible);
@@ -37,43 +36,45 @@ export default function PlatformList({ platforms }: Props) {
   );
 
   useEffect(() => {
-    console.log('PlatformList mounted with', platformsWithApi.length, 'platforms with API');
-    
+    const controller = new AbortController();
+
     const loadPlatformData = async () => {
-      // Загружаем данные только для платформ с API
-      platformsWithApi.forEach(async (platform, index) => {
-        try {
-          const dynamicData = await fetchPlatformData(platform.name, platform.username);
-          
-          // Обновляем только эту конкретную платформу
-          setPlatformsData(prev => 
-            prev.map((p, i) => 
-              i === index 
-                ? {
-                    ...p,
-                    dynamicRank: dynamicData?.rank,
-                    dynamicStats: dynamicData?.stats,
-                    isLoading: false,
-                  }
-                : p
-            )
-          );
-        } catch (error) {
-          console.error(`Error loading ${platform.name}:`, error);
-          
-          // Помечаем как загруженную даже при ошибке
-          setPlatformsData(prev => 
-            prev.map((p, i) => 
-              i === index 
-                ? { ...p, isLoading: false }
-                : p
-            )
-          );
-        }
-      });
+      await Promise.all(
+        platformsWithApi.map(async (platform, index) => {
+          try {
+            const dynamicData = await fetchPlatformData(platform.name, platform.username);
+
+            if (controller.signal.aborted) return;
+
+            setPlatformsData(prev =>
+              prev.map((p, i) =>
+                i === index
+                  ? {
+                      ...p,
+                      dynamicRank: dynamicData?.rank,
+                      dynamicStats: dynamicData?.stats,
+                      isLoading: false,
+                      hasError: dynamicData === null,
+                    }
+                  : p
+              )
+            );
+          } catch {
+            if (controller.signal.aborted) return;
+
+            setPlatformsData(prev =>
+              prev.map((p, i) =>
+                i === index ? { ...p, isLoading: false, hasError: true } : p
+              )
+            );
+          }
+        })
+      );
     };
 
     loadPlatformData();
+
+    return () => controller.abort();
   }, [platforms]);
 
   // Группируем платформы по категориям
@@ -138,9 +139,9 @@ export default function PlatformList({ platforms }: Props) {
           }}
         >
           {platform.isLoading ? (
-            <span className="inline-flex items-center gap-1">
-              <span className="animate-pulse">Получение данных...</span>
-            </span>
+            <span className="animate-pulse">Получение данных...</span>
+          ) : platform.hasError ? (
+            displayRank
           ) : (
             displayRank
           )}
@@ -160,6 +161,14 @@ export default function PlatformList({ platforms }: Props) {
                 </li>
               ))}
             </>
+          ) : platform.hasError ? (
+            <li className="flex items-start gap-2 text-xs text-[var(--color-text-muted)] sm:text-sm">
+              <span
+                className="mt-1 h-1 w-1 shrink-0 rounded-full sm:mt-1.5"
+                style={{ backgroundColor: platform.color }}
+              ></span>
+              Данные временно недоступны
+            </li>
           ) : (
             displayStats.map((stat, idx) => (
               <li key={idx} className="flex items-start gap-2 text-xs text-[var(--color-text-secondary)] sm:text-sm">

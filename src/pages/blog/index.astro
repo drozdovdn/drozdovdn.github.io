@@ -2,12 +2,13 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SectionTitle from '../../components/ui/SectionTitle.astro';
 import { getCollection } from 'astro:content';
+import { formatDate, calculateReadTime } from '../../utils/blog';
 
 // Get all blog posts
 const allPosts = await getCollection('blog');
 
 // Sort by date (newest first)
-const posts = allPosts.sort((a, b) => 
+const posts = allPosts.sort((a, b) =>
   b.data.publishedAt.getTime() - a.data.publishedAt.getTime()
 );
 
@@ -20,51 +21,32 @@ const tagCounts = posts.reduce((acc, post) => {
 }, {} as Record<string, number>);
 
 const allTags = Object.keys(tagCounts).sort();
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat('ru-RU', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(date);
-}
-
-function calculateReadTime(content: string) {
-  const wordsPerMinute = 200;
-  const words = content.trim().split(/\s+/).length;
-  return Math.ceil(words / wordsPerMinute);
-}
 ---
 
 <BaseLayout title="Блог">
   <SectionTitle
     title="Блог"
-    subtitle="Статьи о frontend-разработке, архитектуре и извлечённых уроках."
-    filename="blog.ts"
+    subtitle="Я Senior Frontend Engineer, который системно движется в сторону веб-безопасности и Go. Здесь — то, что изучаю в процессе реальных проектов: конкретные концепты с примерами кода, а не пересказ документации."
+    filename="cat intel.log"
   />
 
-  {/* Фильтр по тегам */}
-  <div class="mb-8 scroll-reveal rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 sm:mb-12 sm:p-6">
-    <div class="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:items-center sm:justify-between">
-      <h3 class="text-sm font-semibold text-[var(--color-text-muted)]">🏷️ Фильтр по тегам:</h3>
-      <button
-        id="clear-filter"
-        class="hidden self-start text-xs text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-hover)] sm:self-auto"
-      >
-        Сбросить фильтр
-      </button>
-    </div>
+  {/* Мобильный фильтр — только на маленьких экранах */}
+  <div class="mb-6 lg:hidden">
     <div class="flex flex-wrap gap-2">
       <button
         data-filter="all"
-        class="filter-tag tag-clickable rounded-full bg-[var(--color-accent)] px-2.5 py-1 text-xs font-medium text-white transition-all hover:opacity-80 sm:px-3 sm:py-1.5"
+        data-btn-type="mobile"
+        aria-pressed="true"
+        class="filter-tag rounded-full bg-[var(--color-accent)] px-2.5 py-1 text-xs font-medium text-white transition-all hover:opacity-80"
       >
         Все ({posts.length})
       </button>
       {allTags.map(tag => (
         <button
           data-filter={tag}
-          class="filter-tag tag-clickable rounded-full bg-[var(--color-accent)]/10 px-2.5 py-1 text-xs font-medium text-[var(--color-accent)] transition-all hover:bg-[var(--color-accent)]/20 sm:px-3 sm:py-1.5"
+          data-btn-type="mobile"
+          aria-pressed="false"
+          class="filter-tag rounded-full bg-[var(--color-accent)]/10 px-2.5 py-1 text-xs font-medium text-[var(--color-accent)] transition-all hover:bg-[var(--color-accent)]/20"
         >
           {tag} ({tagCounts[tag]})
         </button>
@@ -72,107 +54,125 @@ function calculateReadTime(content: string) {
     </div>
   </div>
 
-  <div id="posts-container" class="grid gap-6 sm:gap-8">
-    {posts.map((post, i) => (
-      <article
-        class="post-item scroll-reveal group rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 transition-all hover:border-[var(--color-accent)] hover:-translate-y-1 sm:p-6"
-        style={`transition-delay: ${i * 100}ms`}
-        data-tags={post.data.tags.join(',')}
-      >
-        {/* Tags */}
-        <div class="mb-3 flex flex-wrap gap-2">
-          {post.data.tags.map(tag => (
-            <a
-              href={`/blog/tag/${tag}/`}
-              class="tag-clickable rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-xs font-medium text-[var(--color-accent)] transition-all hover:bg-[var(--color-accent)]/20 sm:px-2.5"
-            >
-              {tag}
-            </a>
-          ))}
-        </div>
+  {/* Основной layout: сайдбар + контент */}
+  <div class="flex gap-10">
 
-        {/* Title */}
-        <h2 class="mb-2 text-xl font-bold text-[var(--color-text-primary)] transition-colors group-hover:text-[var(--color-accent)] sm:text-2xl">
-          <a href={`/blog/${post.slug}/`}>
-            {post.data.title}
-          </a>
-        </h2>
-
-        {/* Meta */}
-        <div class="mb-3 flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
-          <span>{formatDate(post.data.publishedAt)}</span>
-          <span>•</span>
-          <span>{calculateReadTime(post.body)} мин чтения</span>
-        </div>
-
-        {/* Description */}
-        <p class="mb-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-          {post.data.description}
+    {/* Левый сайдбар — только на десктопе */}
+    <aside class="hidden lg:block w-44 shrink-0">
+      <div class="sticky top-28">
+        <p class="mb-3 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text-muted)]">
+          // темы
         </p>
+        <nav class="space-y-0.5">
+          <button
+            data-filter="all"
+            data-btn-type="sidebar"
+            aria-pressed="true"
+            class="filter-tag group flex w-full items-center justify-between rounded px-3 py-2 text-sm transition-all bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
+          >
+            <span class="font-medium">Все статьи</span>
+            <span class="rounded-full bg-[var(--color-accent)]/20 px-1.5 py-0.5 text-[10px] font-bold tabular-nums">
+              {posts.length}
+            </span>
+          </button>
 
-        {/* Read more */}
-        <a
-          href={`/blog/${post.slug}/`}
-          class="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-accent)] transition-colors hover:underline"
+          {allTags.map(tag => (
+            <button
+              data-filter={tag}
+              data-btn-type="sidebar"
+              aria-pressed="false"
+              class="filter-tag group flex w-full items-center justify-between rounded px-3 py-2 text-sm text-[var(--color-text-secondary)] transition-all hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-text-primary)]"
+            >
+              <span>{tag}</span>
+              <span class="rounded-full bg-[var(--color-border)] px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-[var(--color-text-muted)]">
+                {tagCounts[tag]}
+              </span>
+            </button>
+          ))}
+        </nav>
+
+        {/* Сброс фильтра */}
+        <button
+          id="clear-filter"
+          class="mt-4 hidden w-full text-left text-xs text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-accent)]"
         >
-          Читать далее
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </a>
-      </article>
-    ))}
-  </div>
+          ← сбросить фильтр
+        </button>
+      </div>
+    </aside>
 
-  {/* Сообщение, если нет результатов */}
-  <div
-    id="no-results"
-    class="hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-12 text-center"
-  >
-    <p class="text-[var(--color-text-muted)]">
-      Статей с выбранным тегом не найдено
-    </p>
+    {/* Список статей */}
+    <div class="min-w-0 flex-1">
+      <div id="posts-container" class="grid gap-6 sm:gap-8">
+        {posts.map((post, i) => (
+          <article
+            class="post-item scroll-reveal group rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 transition-all hover:border-[var(--color-accent)] hover:-translate-y-1 sm:p-6"
+            style={`transition-delay: ${Math.min(i * 100, 400)}ms`}
+            data-tags={post.data.tags.join(',')}
+          >
+            {/* Tags */}
+            <div class="mb-3 flex flex-wrap gap-2">
+              {post.data.tags.map(tag => (
+                <a
+                  href={`/blog/tag/${tag}/`}
+                  class="tag-clickable rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-xs font-medium text-[var(--color-accent)] transition-all hover:bg-[var(--color-accent)]/20 sm:px-2.5"
+                >
+                  {tag}
+                </a>
+              ))}
+            </div>
+
+            {/* Title */}
+            <h2 class="mb-2 text-xl font-bold text-[var(--color-text-primary)] transition-colors group-hover:text-[var(--color-accent)] sm:text-2xl">
+              <a href={`/blog/${post.slug}/`}>
+                {post.data.title}
+              </a>
+            </h2>
+
+            {/* Meta */}
+            <div class="mb-3 flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
+              <span>{formatDate(post.data.publishedAt)}</span>
+              <span>•</span>
+              <span>{calculateReadTime(post.body)} мин чтения</span>
+            </div>
+
+            {/* Description */}
+            <p class="text-sm leading-relaxed text-[var(--color-text-secondary)]">
+              {post.data.description}
+            </p>
+          </article>
+        ))}
+      </div>
+
+      {/* Сообщение, если нет результатов */}
+      <div
+        id="no-results"
+        class="hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-12 text-center"
+      >
+        <p class="text-[var(--color-text-muted)]">
+          Статей с выбранным тегом не найдено
+        </p>
+      </div>
+    </div>
   </div>
 </BaseLayout>
 
 <script>
-  // Клиентская фильтрация по тегам
-  const filterButtons = document.querySelectorAll('.filter-tag');
-  const posts = document.querySelectorAll('.post-item');
-  const clearButton = document.getElementById('clear-filter');
-  const noResults = document.getElementById('no-results');
-  const postsContainer = document.getElementById('posts-container');
+  function initBlogFilter() {
+    const sidebarButtons = document.querySelectorAll<HTMLElement>('[data-btn-type="sidebar"]');
+    const mobileButtons = document.querySelectorAll<HTMLElement>('[data-btn-type="mobile"]');
+    const posts = document.querySelectorAll<HTMLElement>('.post-item');
+    const clearButton = document.getElementById('clear-filter');
+    const noResults = document.getElementById('no-results');
+    const postsContainer = document.getElementById('posts-container');
 
-  let activeFilter = 'all';
+    // Если кнопок фильтра нет — мы не на странице блога, выходим
+    if (!sidebarButtons.length && !mobileButtons.length) return;
 
-  filterButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const filter = button.getAttribute('data-filter');
-      activeFilter = filter;
-
-      // Обновляем активную кнопку
-      filterButtons.forEach(btn => {
-        if (btn.getAttribute('data-filter') === filter) {
-          btn.classList.remove('bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
-          btn.classList.add('bg-[var(--color-accent)]', 'text-white');
-        } else {
-          btn.classList.remove('bg-[var(--color-accent)]', 'text-white');
-          btn.classList.add('bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
-        }
-      });
-
-      // Показываем/скрываем кнопку сброса
-      if (filter === 'all') {
-        clearButton?.classList.add('hidden');
-      } else {
-        clearButton?.classList.remove('hidden');
-      }
-
-      // Фильтруем посты
+    function filterPosts(filter: string) {
       let visibleCount = 0;
       posts.forEach(post => {
-        const tags = post.getAttribute('data-tags')?.split(',') || [];
-        
+        const tags = post.dataset.tags?.split(',') ?? [];
         if (filter === 'all' || tags.includes(filter)) {
           post.classList.remove('hidden');
           visibleCount++;
@@ -181,7 +181,6 @@ function calculateReadTime(content: string) {
         }
       });
 
-      // Показываем сообщение, если нет результатов
       if (visibleCount === 0) {
         postsContainer?.classList.add('hidden');
         noResults?.classList.remove('hidden');
@@ -189,14 +188,62 @@ function calculateReadTime(content: string) {
         postsContainer?.classList.remove('hidden');
         noResults?.classList.add('hidden');
       }
-    });
-  });
-
-  // Кнопка сброса фильтра
-  clearButton?.addEventListener('click', () => {
-    const allButton = document.querySelector('[data-filter="all"]');
-    if (allButton instanceof HTMLElement) {
-      allButton.click();
     }
-  });
+
+    function updateSidebarButtons(filter: string) {
+      sidebarButtons.forEach(btn => {
+        const isActive = btn.dataset.filter === filter;
+        btn.setAttribute('aria-pressed', String(isActive));
+        if (isActive) {
+          btn.classList.add('bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
+          btn.classList.remove('text-[var(--color-text-secondary)]');
+        } else {
+          btn.classList.remove('bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
+          btn.classList.add('text-[var(--color-text-secondary)]');
+        }
+      });
+    }
+
+    function updateMobileButtons(filter: string) {
+      mobileButtons.forEach(btn => {
+        const isActive = btn.dataset.filter === filter;
+        btn.setAttribute('aria-pressed', String(isActive));
+        if (isActive) {
+          btn.classList.add('bg-[var(--color-accent)]', 'text-white');
+          btn.classList.remove('bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
+        } else {
+          btn.classList.remove('bg-[var(--color-accent)]', 'text-white');
+          btn.classList.add('bg-[var(--color-accent)]/10', 'text-[var(--color-accent)]');
+        }
+      });
+    }
+
+    function setFilter(filter: string) {
+      updateSidebarButtons(filter);
+      updateMobileButtons(filter);
+      filterPosts(filter);
+
+      if (clearButton) {
+        if (filter === 'all') {
+          clearButton.classList.add('hidden');
+        } else {
+          clearButton.classList.remove('hidden');
+        }
+      }
+    }
+
+    // Навешиваем обработчики на все кнопки
+    document.querySelectorAll<HTMLElement>('[data-filter]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter ?? 'all';
+        setFilter(filter);
+      });
+    });
+
+    // Кнопка сброса
+    clearButton?.addEventListener('click', () => setFilter('all'));
+  }
+
+  // Запускаем при каждой навигации (включая первую загрузку)
+  document.addEventListener('astro:page-load', initBlogFilter);
 </script>

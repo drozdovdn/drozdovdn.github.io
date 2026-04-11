@@ -7,12 +7,15 @@ import { getCollection } from 'astro:content';
 import { navItems } from '../data/navigation';
 
 const terminalLines = [
-  { text: 'const engineer = new SeniorFrontendEngineer();' },
-  { text: 'engineer.focus = ["architecture", "performance", "scalability"];' },
-  { text: 'engineer.experience = "5+ лет";' },
-  { text: 'engineer.learning = "web security";' },
-  { text: 'console.log(engineer.build());' },
-  { text: '→ Готов создавать масштабируемые, производительные и безопастные решения.', isOutput: true },
+  { text: '$ whoami' },
+  { text: 'drozdov — senior frontend engineer / web security learner', isOutput: true },
+  { text: '$ cat skills.txt' },
+  { text: 'React · TypeScript · Node.js · Go · OWASP · Burp Suite · CTF', isOutput: true },
+  { text: '$ nmap -sV --open target', isOutput: false },
+  { text: 'PORT     STATE  SERVICE   VERSION', isOutput: true },
+  { text: '443/tcp  open   https     nginx 1.24 [TLS 1.3]', isOutput: true },
+  { text: '$ ./recon.sh --mode=passive drozdovdn.github.io' },
+  { text: '[+] строю безопасные масштабируемые системы.', isOutput: true },
 ];
 
 // Проверяем, видим ли раздел "Блог" в навигации
@@ -50,52 +53,59 @@ function formatDate(date: Date) {
     </div>
 
     <div class="lg:pl-12">
-      {/* Greeting */}
-      <p class="mb-2 text-sm text-[var(--color-accent)]">
-        {'// '}Hello, World!
-      </p>
+      <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
+        {/* Left column: text + CTAs */}
+        <div>
+          {/* Greeting */}
+          <p class="mb-2 text-sm text-[var(--color-accent)]">
+            {'// '}Hello, World!
+          </p>
 
-      {/* Name */}
-      <h1
-        class="glitch-hover mb-2 text-4xl font-bold text-[var(--color-text-primary)] sm:text-5xl lg:text-6xl"
-        data-text="Дмитрий Дроздов"
-      >
-        Дмитрий Дроздов
-      </h1>
+          {/* Name */}
+          <h1
+            class="glitch-hover mb-2 text-4xl font-bold text-[var(--color-text-primary)] sm:text-5xl lg:text-6xl"
+            data-text="Дмитрий Дроздов"
+          >
+            Дмитрий Дроздов
+          </h1>
 
-      {/* Role */}
-      <h2 class="mb-4 text-xl text-[var(--color-accent)] sm:text-2xl">
-        Senior Frontend Engineer
-      </h2>
+          {/* Role */}
+          <h2 class="mb-4 text-xl text-[var(--color-accent)] sm:text-2xl">
+            Senior Frontend Engineer
+          </h2>
 
-      {/* Subtitle */}
-      <p class="mb-6 max-w-xl text-sm leading-relaxed text-[var(--color-text-secondary)] sm:mb-8 sm:text-base">
-        Делаю фронтенд, который переживает рост продукта: архитектура, поддерживаемость, контроль сложности и стабильные изменения. <br class="hidden sm:inline"/>
-        Системно работаю с производительностью и развиваюсь в направлении веб-безопасности.
-      </p>
+          {/* Subtitle */}
+          <p class="mb-8 max-w-xl text-sm leading-relaxed text-[var(--color-text-secondary)] sm:text-base">
+            Делаю фронтенд, который переживает рост продукта: архитектура, поддерживаемость, контроль сложности и стабильные изменения.{' '}
+            Системно работаю с производительностью и развиваюсь в направлении веб-безопасности.
+          </p>
 
-      {/* Terminal */}
-      <Terminal title="~/portfolio $ node intro.js" class="mb-8 max-w-2xl">
-        <TypingEffect lines={terminalLines} id="hero-typing" />
-      </Terminal>
+          {/* CTAs */}
+          <div class="flex flex-wrap gap-4">
+            <a
+              href="/experience/"
+              class="inline-flex items-center gap-2 rounded-lg bg-[var(--color-accent)] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-accent-hover)]"
+            >
+              Смотреть опыт
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </a>
+            <a
+              href="/contact/"
+              class="inline-flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-6 py-3 text-sm font-semibold text-[var(--color-text-primary)] transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+            >
+              Связаться
+            </a>
+          </div>
+        </div>
 
-      {/* CTAs */}
-      <div class="flex flex-wrap gap-4">
-        <a
-          href="/experience/"
-          class="inline-flex items-center gap-2 rounded-lg bg-[var(--color-accent)] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-accent-hover)]"
-        >
-          Смотреть опыт
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </a>
-        <a
-          href="/contact/"
-          class="inline-flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-6 py-3 text-sm font-semibold text-[var(--color-text-primary)] transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
-        >
-          Связаться
-        </a>
+        {/* Right column: terminal */}
+        <div>
+          <Terminal title="drozdov@kali:~$ ./recon.sh">
+            <TypingEffect lines={terminalLines} id="hero-typing" />
+          </Terminal>
+        </div>
       </div>
     </div>
   </section>
@@ -103,7 +113,7 @@ function formatDate(date: Date) {
   {/* ===== ABOUT SECTION ===== */}
   <section class="relative z-10 py-16" id="about">
     <div class="scroll-reveal mb-8">
-      <span class="mb-2 block text-xs text-[var(--color-text-muted)]">{'// about.ts'}</span>
+      <span class="mb-2 block text-xs text-[var(--color-text-muted)]">{'$ whoami --verbose'}</span>
       <h2 class="text-3xl font-bold text-[var(--color-text-primary)]">
         <span class="text-[var(--color-accent)]">{'{ '}</span>
         Обо мне
@@ -119,10 +129,10 @@ function formatDate(date: Date) {
           Senior Frontend Engineer с 5+ годами опыта создания масштабируемых веб-приложений. Специализация — frontend-архитектура, системный дизайн и высокопроизводительные решения на React, TypeScript и современных инструментах.
         </p>
         <p class="scroll-reveal text-sm leading-relaxed text-[var(--color-text-secondary)]" style="transition-delay: 100ms">
-          Увлекаюсь чистым кодом, компонентным подходом и надёжными решениями. В свободное время решаю CTF-задачи на платформах безопасности — прошёл курс по веб-пентестингу и активно практикуюсь.
+          Системно углубляюсь в веб-безопасность: прошёл курс по веб-пентестингу, решаю CTF-задачи на специализированных платформах, изучаю Go для разработки security-инструментов. Это не хобби — это осознанный переход из Frontend в AppSec.
         </p>
         <p class="scroll-reveal text-sm leading-relaxed text-[var(--color-text-secondary)]" style="transition-delay: 200ms">
-          Фокус на архитектурных решениях, балансирующих масштабируемость, поддерживаемость и удобство для разработчиков.
+          В блоге фиксирую то, что изучаю в процессе реальных проектов: разборы конкретных концептов с кодом, находки из практики и выводы из ошибок.
         </p>
       </div>
 
@@ -149,7 +159,7 @@ function formatDate(date: Date) {
   {showBlogSection && (
     <section class="relative z-10 py-16" id="blog">
       <div class="scroll-reveal mb-8">
-        <span class="mb-2 block text-xs text-[var(--color-text-muted)]">{'// blog.ts'}</span>
+        <span class="mb-2 block text-xs text-[var(--color-text-muted)]">{'$ cat intel.log'}</span>
         <div class="flex items-center justify-between">
           <h2 class="text-3xl font-bold text-[var(--color-text-primary)]">
             <span class="text-[var(--color-accent)]">{'{ '}</span>

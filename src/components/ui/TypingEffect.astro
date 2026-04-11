@@ -16,7 +16,6 @@ const { lines, id = 'typing-terminal' } = Astro.props;
         { 'text-[var(--color-accent-secondary)]': line.isOutput },
       ]}
       data-line-index={i}
-      data-delay={line.delay ?? i * 800}
     >
       {!line.isOutput && (
         <span class="mr-2 text-[var(--color-text-muted)]">{'>'}</span>
@@ -29,59 +28,67 @@ const { lines, id = 'typing-terminal' } = Astro.props;
 
 <script is:inline define:vars={{ lines, id }}>
   (function () {
-    const container = document.getElementById(id);
-    if (!container) return;
+    // Guard against duplicate listener registration when script re-runs across navigations
+    var listenerKey = '_typingListener_' + id;
+    if (window[listenerKey]) return;
+    window[listenerKey] = true;
 
-    const lineEls = container.querySelectorAll('.typing-line');
+    function initTyping() {
+      var container = document.getElementById(id);
+      if (!container) return;
 
-    const typeLineText = (el, text, charDelay = 30) => {
-      return new Promise((resolve) => {
-        const textEl = el.querySelector('.typing-text');
-        const cursorEl = el.querySelector('.typing-cursor');
-        let i = 0;
-        el.style.opacity = '1';
-        cursorEl.style.opacity = '1';
-        cursorEl.classList.add('animate-blink');
+      var lineEls = container.querySelectorAll('.typing-line');
 
-        const interval = setInterval(() => {
-          textEl.textContent += text[i];
-          i++;
-          if (i >= text.length) {
-            clearInterval(interval);
-            setTimeout(() => {
-              cursorEl.style.opacity = '0';
-              cursorEl.classList.remove('animate-blink');
-              resolve();
-            }, 200);
-          }
-        }, charDelay);
+      // Reset state (needed when navigating back — DOM is fresh but guard anyway)
+      lineEls.forEach(function (el) {
+        el.style.opacity = '0';
+        var t = el.querySelector('.typing-text');
+        if (t) t.textContent = '';
+        var c = el.querySelector('.typing-cursor');
+        if (c) { c.style.opacity = '0'; c.classList.remove('animate-blink'); }
       });
-    };
 
-    const runSequence = async () => {
-      for (let i = 0; i < lines.length; i++) {
-        const delay = lines[i].delay ?? i * 800;
-        if (i > 0) await new Promise((r) => setTimeout(r, 400));
-        await typeLineText(lineEls[i], lines[i].text, lines[i].isOutput ? 15 : 35);
-      }
-      // Show final cursor blinking
-      const lastCursor = lineEls[lineEls.length - 1]?.querySelector('.typing-cursor');
-      if (lastCursor) {
-        lastCursor.style.opacity = '1';
-        lastCursor.classList.add('animate-blink');
-      }
-    };
+      function typeLineText(el, text, charDelay) {
+        charDelay = charDelay || 30;
+        return new Promise(function (resolve) {
+          var textEl = el.querySelector('.typing-text');
+          var cursorEl = el.querySelector('.typing-cursor');
+          var i = 0;
+          el.style.opacity = '1';
+          cursorEl.style.opacity = '1';
+          cursorEl.classList.add('animate-blink');
 
-    // Start on intersection
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          observer.disconnect();
-          setTimeout(runSequence, 500);
+          var interval = setInterval(function () {
+            textEl.textContent += text[i];
+            i++;
+            if (i >= text.length) {
+              clearInterval(interval);
+              setTimeout(function () {
+                cursorEl.style.opacity = '0';
+                cursorEl.classList.remove('animate-blink');
+                resolve();
+              }, 200);
+            }
+          }, charDelay);
+        });
+      }
+
+      async function runSequence() {
+        for (var i = 0; i < lines.length; i++) {
+          if (i > 0) await new Promise(function (r) { setTimeout(r, 400); });
+          await typeLineText(lineEls[i], lines[i].text, lines[i].isOutput ? 15 : 35);
         }
-      },
-      { threshold: 0.3 }
-    );
-    observer.observe(container);
+        var lastCursor = lineEls[lineEls.length - 1] && lineEls[lineEls.length - 1].querySelector('.typing-cursor');
+        if (lastCursor) {
+          lastCursor.style.opacity = '1';
+          lastCursor.classList.add('animate-blink');
+        }
+      }
+
+      setTimeout(runSequence, 500);
+    }
+
+    // astro:page-load fires on both first load and after every view transition
+    document.addEventListener('astro:page-load', initTyping);
   })();
 </script>

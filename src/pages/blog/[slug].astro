@@ -1,35 +1,34 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { formatDate, calculateReadTime } from '../../utils/blog';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
-  
-  return posts.map(post => ({
+  const sorted = posts.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+
+  return sorted.map((post, i) => ({
     params: { slug: post.slug },
-    props: { post },
+    props: {
+      post,
+      prevPost: sorted[i + 1] ?? null,
+      nextPost: sorted[i - 1] ?? null,
+    },
   }));
 }
 
-const { post } = Astro.props;
+const { post, prevPost, nextPost } = Astro.props;
 const { Content } = await post.render();
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat('ru-RU', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(date);
-}
-
-function calculateReadTime(content: string) {
-  const wordsPerMinute = 200;
-  const words = content.trim().split(/\s+/).length;
-  return Math.ceil(words / wordsPerMinute);
-}
 ---
 
-<BaseLayout title={post.data.title}>
+<BaseLayout title={post.data.title} description={post.data.description}>
+  {/* Reading progress bar */}
+  <div
+    id="reading-progress"
+    class="fixed left-0 top-0 z-[60] h-0.5 w-0 bg-[var(--color-accent)]"
+    style="transition: width 0.1s linear;"
+  ></div>
+
   <article class="mx-auto max-w-3xl">
     {/* Back button */}
     <a
@@ -70,8 +69,173 @@ function calculateReadTime(content: string) {
     <div class="prose prose-invert max-w-none">
       <Content />
     </div>
+
+    {/* Prev / Next navigation */}
+    {(prevPost || nextPost) && (
+      <nav class="mt-16 border-t border-[var(--color-border)] pt-8 grid grid-cols-2 gap-4">
+        <div>
+          {prevPost && (
+            <a
+              href={`/blog/${prevPost.slug}/`}
+              class="group flex flex-col gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 transition-all hover:border-[var(--color-accent)] hover:-translate-y-0.5"
+            >
+              <span class="text-xs text-[var(--color-text-muted)]">← Предыдущая</span>
+              <span class="text-sm font-medium text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors line-clamp-2">
+                {prevPost.data.title}
+              </span>
+            </a>
+          )}
+        </div>
+        <div>
+          {nextPost && (
+            <a
+              href={`/blog/${nextPost.slug}/`}
+              class="group flex flex-col gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 text-right transition-all hover:border-[var(--color-accent)] hover:-translate-y-0.5"
+            >
+              <span class="text-xs text-[var(--color-text-muted)]">Следующая →</span>
+              <span class="text-sm font-medium text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors line-clamp-2">
+                {nextPost.data.title}
+              </span>
+            </a>
+          )}
+        </div>
+      </nav>
+    )}
   </article>
 </BaseLayout>
+
+<script is:inline>
+  (function () {
+    var DARK = {
+      primaryColor: '#1a1a1a',
+      primaryTextColor: '#e5e5e5',
+      primaryBorderColor: '#e8622c',
+      lineColor: '#e8622c',
+      secondaryColor: '#141414',
+      tertiaryColor: '#141414',
+      background: '#141414',
+      mainBkg: '#1a1a1a',
+      nodeBorder: '#e8622c',
+      clusterBkg: '#141414',
+      clusterBorder: '#262626',
+      titleColor: '#e5e5e5',
+      edgeLabelBackground: '#141414',
+      fontFamily: 'JetBrains Mono, monospace',
+      fontSize: '13px',
+    };
+
+    var LIGHT = {
+      primaryColor: '#f8f8f8',
+      primaryTextColor: '#0f0f0f',
+      primaryBorderColor: '#d94c10',
+      lineColor: '#d94c10',
+      secondaryColor: '#f0f0f0',
+      tertiaryColor: '#f0f0f0',
+      background: '#ffffff',
+      mainBkg: '#f8f8f8',
+      nodeBorder: '#d94c10',
+      clusterBkg: '#f8f8f8',
+      clusterBorder: '#e0e0e0',
+      titleColor: '#0f0f0f',
+      edgeLabelBackground: '#ffffff',
+      fontFamily: 'JetBrains Mono, monospace',
+      fontSize: '13px',
+    };
+
+    async function runMermaid() {
+      var els = document.querySelectorAll('.mermaid:not([data-processed])');
+      if (!els.length) return;
+
+      var mermaid = window._mermaidModule;
+      if (!mermaid) {
+        var mod = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
+        mermaid = mod.default;
+        window._mermaidModule = mermaid;
+      }
+
+      var isLight = document.documentElement.classList.contains('light');
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: 'base',
+        themeVariables: isLight ? LIGHT : DARK,
+        flowchart: { curve: 'basis', padding: 20 },
+        stateDiagram: { padding: 20 },
+      });
+
+      await mermaid.run({ querySelector: '.mermaid:not([data-processed])' });
+    }
+
+    if (!window._mermaidListenerAdded) {
+      window._mermaidListenerAdded = true;
+      document.addEventListener('astro:page-load', runMermaid);
+    }
+  })();
+</script>
+
+<script is:inline>
+  (function () {
+    var bar = document.getElementById('reading-progress');
+    if (!bar) return;
+
+    window.addEventListener('scroll', function () {
+      var scrollTop = window.scrollY;
+      var docHeight = document.body.scrollHeight - window.innerHeight;
+      var progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      bar.style.width = Math.min(progress, 100) + '%';
+    }, { passive: true });
+  })();
+</script>
+
+<script is:inline>
+  (function () {
+    document.querySelectorAll('.prose pre').forEach(function (pre) {
+      var wrapper = document.createElement('div');
+      wrapper.style.position = 'relative';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.textContent = 'копировать';
+      btn.setAttribute('aria-label', 'Скопировать код');
+      btn.style.cssText = [
+        'position:absolute',
+        'top:0.5rem',
+        'right:0.5rem',
+        'padding:0.2rem 0.6rem',
+        'font-size:0.7rem',
+        'font-family:inherit',
+        'background:var(--color-bg-tertiary)',
+        'color:var(--color-text-muted)',
+        'border:1px solid var(--color-border)',
+        'border-radius:0.25rem',
+        'cursor:pointer',
+        'transition:color 0.2s,border-color 0.2s',
+        'opacity:0',
+        'transition:opacity 0.2s,color 0.2s,border-color 0.2s',
+      ].join(';');
+
+      wrapper.addEventListener('mouseenter', function () { btn.style.opacity = '1'; });
+      wrapper.addEventListener('mouseleave', function () { btn.style.opacity = '0'; });
+
+      btn.addEventListener('click', function () {
+        var code = pre.querySelector('code');
+        var text = code ? code.innerText : pre.innerText;
+        navigator.clipboard.writeText(text).then(function () {
+          btn.textContent = 'скопировано!';
+          btn.style.color = 'var(--color-accent)';
+          btn.style.borderColor = 'var(--color-accent)';
+          setTimeout(function () {
+            btn.textContent = 'копировать';
+            btn.style.color = 'var(--color-text-muted)';
+            btn.style.borderColor = 'var(--color-border)';
+          }, 2000);
+        });
+      });
+
+      wrapper.appendChild(btn);
+    });
+  })();
+</script>
 
 <style is:global>
   /* Prose styles for blog content */
@@ -120,7 +284,7 @@ function calculateReadTime(content: string) {
     padding: 0.125rem 0.375rem;
     border-radius: 0.25rem;
     font-size: 0.875em;
-    font-family: 'Fira Code', 'Courier New', monospace;
+    font-family: var(--font-mono);
   }
 
   .prose pre {
@@ -135,9 +299,21 @@ function calculateReadTime(content: string) {
   .prose pre code {
     background: transparent;
     padding: 0;
-    color: var(--color-text-primary);
     font-size: 0.875rem;
     line-height: 1.6;
+  }
+
+  /* Wire up Shiki dark theme for class-based theming */
+  html:not(.light) .prose .astro-code span {
+    color: var(--shiki-dark) !important;
+  }
+
+  html:not(.light) .prose .astro-code {
+    background-color: var(--color-bg-secondary) !important;
+  }
+
+  html.light .prose .astro-code {
+    background-color: #f6f8fa !important;
   }
 
   /* Light theme specific styles for better code readability */
@@ -159,7 +335,6 @@ function calculateReadTime(content: string) {
   }
 
   html.light .prose pre code {
-    color: #24292e;
     border: none;
     font-weight: 400;
   }
@@ -197,7 +372,23 @@ function calculateReadTime(content: string) {
   html:not(.light) .prose pre code {
     background: transparent;
     border: none;
-    color: var(--color-text-primary);
+  }
+
+  /* Mermaid diagram container */
+  .prose .mermaid {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+  }
+
+  .prose .mermaid svg {
+    max-width: 100%;
+    height: auto;
   }
 
   .prose a {
