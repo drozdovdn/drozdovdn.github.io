@@ -28,7 +28,7 @@ export const navItems: NavItem[] = [
   {
     label: 'Блог',
     path: '/blog/',
-    visible: true,
+    visible: false, // блог отключён; страницы в src/pages/_blog — переименовать обратно в blog, чтобы вернуть
   },
   {
     label: 'Контакты',
