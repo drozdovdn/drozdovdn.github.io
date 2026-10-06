@@ -4,12 +4,10 @@ export interface Platform {
   name: string;
   url: string;
   username: string;
-  rank: string;
-  stats: string[];
   color: string;
   category: PlatformCategory;
-  hasApi: boolean; // Можно ли получить данные через API
-  description?: string; // Короткое описание для платформ без API
+  hasApi: boolean; // Можно ли получить данные через API (цифры приходят только оттуда)
+  description?: string; // Короткое описание / фокус на платформе
   visible: boolean; // Показывать ли платформу (для управления отображением)
 }
 
@@ -25,13 +23,7 @@ export const platforms: Platform[] = [
     category: 'coding',
     hasApi: true,
     visible: true, // Показывать платформу
-    rank: 'Knight — Топ 5%',
-    stats: [
-      '456 задач решено',
-      '180 Medium / 42 Hard',
-      'Рейтинг контестов: 1847',
-      'Рекорд серии: 28 дней',
-    ],
+    description: 'Алгоритмические задачи и контесты',
     color: '#f59e0b',
   },
   {
@@ -41,13 +33,7 @@ export const platforms: Platform[] = [
     category: 'coding',
     hasApi: true,
     visible: true,
-    rank: '4 kyu — Топ 10%',
-    stats: [
-      '380+ ката завершено',
-      'Честь: 1245',
-      'Языки: JavaScript, TypeScript, Python',
-      'Фокус: Алгоритмы и структуры данных',
-    ],
+    description: 'Фокус: алгоритмы и структуры данных',
     color: '#b1361e',
   },
   {
@@ -57,11 +43,7 @@ export const platforms: Platform[] = [
     category: 'coding',
     hasApi: true,
     visible: true,
-    rank: 'Frontend Engineer',
-    stats: [
-      'Загрузка статистики...',
-      'Пожалуйста, подождите',
-    ],
+    description: 'Фокус: frontend-архитектура и производительность',
     color: '#6366f1',
   },
 
@@ -77,8 +59,6 @@ export const platforms: Platform[] = [
     hasApi: false,
     visible: true,
     description: 'Практическая кибербезопасность и CTF-задачи',
-    rank: '',
-    stats: [],
     color: '#ef4444',
   },
   {
@@ -89,8 +69,6 @@ export const platforms: Platform[] = [
     hasApi: false,
     visible: true,
     description: 'Хакерские челленджи и веб-безопасность',
-    rank: '',
-    stats: [],
     color: '#e8622c',
   },
   {
@@ -101,8 +79,6 @@ export const platforms: Platform[] = [
     hasApi: false,
     visible: false,
     description: 'Penetration Testing и Pro Labs',
-    rank: '',
-    stats: [],
     color: '#a3e635',
   },
   {
@@ -113,8 +89,6 @@ export const platforms: Platform[] = [
     hasApi: false,
     visible: false,
     description: 'Web Application Security и Burp Suite',
-    rank: '',
-    stats: [],
     color: '#ff6633',
   },
 ];

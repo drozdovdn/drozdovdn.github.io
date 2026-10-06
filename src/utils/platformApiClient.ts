@@ -2,11 +2,30 @@
  * Client-side Platform API utilities
  * These functions run in the browser
  * Using CORS-friendly proxies and alternative endpoints
+ *
+ * Возвращаем только то, что реально пришло из API: никаких вычисленных
+ * «Топ X%» и запасных цифр. Нет данных → null, карточка покажет «API не ответил».
  */
+
+export interface Metric {
+  label: string;
+  value: string;
+}
+
+export interface Segment {
+  label: string;
+  value: number;
+}
+
+export interface Breakdown {
+  title: string;
+  segments: Segment[];
+}
 
 export interface DynamicPlatformData {
   rank?: string;
-  stats?: string[];
+  metrics: Metric[];
+  breakdown?: Breakdown;
 }
 
 const fetchWithTimeout = (url: string, options: RequestInit = {}, timeoutMs = 6000): Promise<Response> => {
@@ -15,117 +34,57 @@ const fetchWithTimeout = (url: string, options: RequestInit = {}, timeoutMs = 60
   return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(id));
 };
 
+const formatNumber = (n: number): string => n.toLocaleString('ru-RU');
+
 /**
- * LeetCode - Using alfa-leetcode-api proxy (CORS-friendly)
- * https://github.com/alfaarghya/alfa-leetcode-api
+ * Топ-N сегментов по убыванию, остальное сворачиваем в «Другие».
+ * Больше трёх цветов на полосе не различить — см. токены --color-series-*.
+ */
+const topSegments = (entries: Segment[], limit = 3): Segment[] => {
+  const sorted = entries.filter(e => e.value > 0).sort((a, b) => b.value - a.value);
+  const top = sorted.slice(0, limit);
+  const rest = sorted.slice(limit).reduce((sum, e) => sum + e.value, 0);
+  return rest > 0 ? [...top, { label: 'Другие', value: rest }] : top;
+};
+
+/**
+ * LeetCode - Using public CORS-friendly proxy
  */
 export const fetchLeetCodeStats = async (username: string): Promise<DynamicPlatformData | null> => {
   try {
-    // Using public CORS-friendly LeetCode API proxy
     const response = await fetchWithTimeout(`https://leetcode-api-faisalshohag.vercel.app/${username}`);
 
     if (!response.ok) return null;
 
     const data = await response.json();
 
-    if (!data || data.errors) return null;
+    if (!data || data.errors || typeof data.totalSolved !== 'number') return null;
+
+    const metrics: Metric[] = [{ label: 'решено', value: formatNumber(data.totalSolved) }];
+
+    const contestRating = Math.round(data.contestRating || 0);
+    if (contestRating > 0) {
+      metrics.push({ label: 'рейтинг контестов', value: formatNumber(contestRating) });
+    }
 
     const ranking = data.ranking || 0;
-    const totalSolved = data.totalSolved || 0;
-    const easySolved = data.easySolved || 0;
-    const mediumSolved = data.mediumSolved || 0;
-    const hardSolved = data.hardSolved || 0;
-    const contestRating = Math.round(data.contestRating || 0);
+    if (ranking > 0) {
+      metrics.push({ label: 'место в мире', value: `#${formatNumber(ranking)}` });
+    }
 
-    // Calculate percentile (approximate)
-    const percentile = ranking > 0 ? Math.min(Math.round((ranking / 1000000) * 100), 99) : 5;
+    // Порядок фиксирован (Easy → Medium → Hard), не сортируем: это шкала сложности
+    const segments: Segment[] = [
+      { label: 'Easy', value: data.easySolved || 0 },
+      { label: 'Medium', value: data.mediumSolved || 0 },
+      { label: 'Hard', value: data.hardSolved || 0 },
+    ];
 
     return {
-      rank: `Knight — Топ ${percentile}%`,
-      stats: [
-        `${totalSolved} задач решено`,
-        `${mediumSolved} Medium / ${hardSolved} Hard`,
-        `Рейтинг контестов: ${contestRating}`,
-        `Мировой рейтинг: #${ranking.toLocaleString()}`,
-      ],
+      metrics,
+      breakdown: data.totalSolved > 0 ? { title: 'По сложности', segments } : undefined,
     };
   } catch (error) {
     console.error('LeetCode API error:', error);
-    return null;
-  }
-};
-
-/**
- * TryHackMe - Using CORS proxy (THM blocks direct browser requests)
- * Alternative: Use allorigins.win or other CORS proxy
- */
-export const fetchTryHackMeStats = async (username: string): Promise<DynamicPlatformData | null> => {
-  try {
-    // Option 1: Try direct API call (may work in some networks)
-    let response = await fetchWithTimeout(`https://tryhackme.com/api/v2/badges/public-profile?userPublicId=${username}`, {
-      headers: { 'Accept': 'application/json' },
-    }, 8000);
-
-    // If direct call fails with CORS, try CORS proxy
-    if (!response.ok || response.status === 0) {
-      console.log('Direct THM API call failed, trying CORS proxy...');
-      
-      // Using allorigins.win as CORS proxy
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://tryhackme.com/api/v2/badges/public-profile?userPublicId=${username}`)}`;
-
-      response = await fetchWithTimeout(proxyUrl, {}, 8000);
-      
-      if (!response.ok) return null;
-      
-      const proxyData = await response.json();
-      
-      if (!proxyData.contents) return null;
-      
-      const data = JSON.parse(proxyData.contents);
-      
-      if (!data || !data.success) return null;
-
-      const userRank = data.userRank || 0;
-      const level = data.userLevel || 0;
-      const roomsCompleted = data.roomsCompleted || 0;
-      const currentStreak = data.currentStreak || 0;
-
-      const percentile = userRank > 0 ? Math.min(Math.round((userRank / 2000000) * 100), 99) : 2;
-
-      return {
-        rank: `Уровень ${level} — Топ ${percentile}%`,
-        stats: [
-          `${roomsCompleted}+ комнат пройдено`,
-          `Текущая серия: ${currentStreak} дней`,
-          `Мировой рейтинг: #${userRank.toLocaleString()}`,
-          `Learning Paths: Несколько завершено`,
-        ],
-      };
-    }
-
-    // Process direct response
-    const data = await response.json();
-
-    if (!data || !data.success) return null;
-
-    const userRank = data.userRank || 0;
-    const level = data.userLevel || 0;
-    const roomsCompleted = data.roomsCompleted || 0;
-    const currentStreak = data.currentStreak || 0;
-
-    const percentile = userRank > 0 ? Math.min(Math.round((userRank / 2000000) * 100), 99) : 2;
-
-    return {
-      rank: `Уровень ${level} — Топ ${percentile}%`,
-      stats: [
-        `${roomsCompleted}+ комнат пройдено`,
-        `Текущая серия: ${currentStreak} дней`,
-        `Мировой рейтинг: #${userRank.toLocaleString()}`,
-        `Learning Paths: Несколько завершено`,
-      ],
-    };
-  } catch (error) {
-    console.error('TryHackMe API error:', error);
     return null;
   }
 };
@@ -137,35 +96,35 @@ export const fetchTryHackMeStats = async (username: string): Promise<DynamicPlat
 export const fetchCodewarsStats = async (username: string): Promise<DynamicPlatformData | null> => {
   try {
     const response = await fetchWithTimeout(`https://www.codewars.com/api/v1/users/${username}`);
-    
+
     if (!response.ok) return null;
 
     const data = await response.json();
 
     if (!data || !data.username) return null;
 
-    const honor = data.honor || 0;
-    const totalCompleted = data.codeChallenges?.totalCompleted || 0;
-    const rank = data.ranks?.overall?.name || '8 kyu';
+    const metrics: Metric[] = [
+      { label: 'ката решено', value: formatNumber(data.codeChallenges?.totalCompleted || 0) },
+      { label: 'честь', value: formatNumber(data.honor || 0) },
+    ];
+
     const leaderboardPosition = data.leaderboardPosition || 0;
+    if (leaderboardPosition > 0) {
+      metrics.push({ label: 'место в рейтинге', value: `#${formatNumber(leaderboardPosition)}` });
+    }
 
-    // Get top languages
-    const languages = data.ranks?.languages || {};
-    const topLangs = Object.keys(languages)
-      .slice(0, 3)
-      .join(', ') || 'JavaScript, TypeScript';
-
-    // Calculate approximate percentile
-    const percentile = leaderboardPosition > 0 ? Math.min(Math.round((leaderboardPosition / 3000000) * 100), 99) : 10;
+    const languages: Record<string, { score?: number }> = data.ranks?.languages || {};
+    const segments = topSegments(
+      Object.entries(languages).map(([lang, info]) => ({
+        label: lang.charAt(0).toUpperCase() + lang.slice(1),
+        value: info.score || 0,
+      }))
+    );
 
     return {
-      rank: `${rank} — Топ ${percentile}%`,
-      stats: [
-        `${totalCompleted}+ ката завершено`,
-        `Честь: ${honor.toLocaleString()}`,
-        `Языки: ${topLangs}`,
-        `Фокус: Алгоритмы и структуры данных`,
-      ],
+      rank: data.ranks?.overall?.name,
+      metrics,
+      breakdown: segments.length > 0 ? { title: 'Языки, очки', segments } : undefined,
     };
   } catch (error) {
     console.error('Codewars API error:', error);
@@ -180,48 +139,50 @@ export const fetchCodewarsStats = async (username: string): Promise<DynamicPlatf
 export const fetchGitHubStats = async (username: string): Promise<DynamicPlatformData | null> => {
   try {
     const response = await fetchWithTimeout(`https://api.github.com/users/${username}`);
-    
+
     if (!response.ok) return null;
 
     const data = await response.json();
 
     if (!data || !data.login) return null;
 
-    const publicRepos = data.public_repos || 0;
-    const followers = data.followers || 0;
-    const following = data.following || 0;
+    const metrics: Metric[] = [{ label: 'репозиториев', value: formatNumber(data.public_repos || 0) }];
 
-    // Fetch repos to get top languages
-    const reposResponse = await fetchWithTimeout(`https://api.github.com/users/${username}/repos?sort=updated&per_page=10`);
-    let topLanguages = 'TypeScript, React, Next.js';
-    
+    let breakdown: Breakdown | undefined;
+
+    const reposResponse = await fetchWithTimeout(
+      `https://api.github.com/users/${username}/repos?type=owner&per_page=100`
+    );
+
     if (reposResponse.ok) {
-      const repos = await reposResponse.json();
+      const repos: Array<{ fork: boolean; language: string | null; stargazers_count: number }> =
+        await reposResponse.json();
+      const ownRepos = repos.filter(repo => !repo.fork);
+
+      const stars = ownRepos.reduce((sum, repo) => sum + (repo.stargazers_count || 0), 0);
+      metrics.push({ label: 'звёзд', value: formatNumber(stars) });
+
       const langCount: Record<string, number> = {};
-      repos.forEach((repo: any) => {
+      ownRepos.forEach(repo => {
         if (repo.language) {
           langCount[repo.language] = (langCount[repo.language] || 0) + 1;
         }
       });
-      
-      const sortedLangs = Object.entries(langCount)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(([lang]) => lang);
-      
-      if (sortedLangs.length > 0) {
-        topLanguages = sortedLangs.join(', ');
+
+      const segments = topSegments(Object.entries(langCount).map(([label, value]) => ({ label, value })));
+      if (segments.length > 0) {
+        breakdown = { title: 'Языки по репозиториям', segments };
       }
     }
 
+    metrics.push({ label: 'подписчиков', value: formatNumber(data.followers || 0) });
+
+    const createdYear = data.created_at ? new Date(data.created_at).getFullYear() : undefined;
+
     return {
-      rank: 'Frontend Engineer',
-      stats: [
-        `${publicRepos} публичных репозиториев`,
-        `${followers} подписчиков`,
-        `Языки: ${topLanguages}`,
-        `Фокус: Frontend-архитектура и производительность`,
-      ],
+      rank: createdYear ? `на GitHub с ${createdYear}` : undefined,
+      metrics,
+      breakdown,
     };
   } catch (error) {
     console.error('GitHub API error:', error);

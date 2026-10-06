@@ -17,6 +17,13 @@
   --color-accent-secondary: #f59e0b;
   --color-accent-secondary-hover: #fbbf24;
 
+  /* Сегменты полос на /platforms (категориальная палитра, проверена на CVD) */
+  --color-series-1: #3987e5;
+  --color-series-2: #d95926;
+  --color-series-3: #199e70;
+  --color-series-other: #525252;
+  --color-status-live: #22c55e;
+
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 }
 
@@ -58,6 +65,11 @@ html.light {
   --color-accent-hover: #e8622c;
   --color-accent-secondary: #d97706;
   --color-accent-secondary-hover: #f59e0b;
+  --color-series-1: #2a78d6;
+  --color-series-2: #eb6834;
+  --color-series-3: #1baf7a;
+  --color-series-other: #c4c4c4;
+  --color-status-live: #16a34a;
 }
 
 /* Light theme: better readability for cards and borders */
